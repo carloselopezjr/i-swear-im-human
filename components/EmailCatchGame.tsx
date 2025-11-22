@@ -136,11 +136,11 @@ export default function EmailCatchGame({
   return (
     <div className="flex flex-col items-center">
       {/* GAME BOX */}
-      <div className="relative w-[350px] h-[450px] bg-yellow-200 border-4 border-black overflow-hidden">
+      <div className="relative w-[350px] h-[450px] bg-slate-300 border-4 border-black overflow-hidden">
         {chars.map((c) => (
           <div
             key={c.id}
-            className="absolute text-3xl font-bold text-green-700 select-none"
+            className="absolute text-3xl font-bold text-purple-700 select-none"
             style={{ top: c.y, left: c.x }}
           >
             {c.letter}
@@ -162,14 +162,14 @@ export default function EmailCatchGame({
       {/* BACKSPACE + CONFIRM SIDE BY SIDE */}
       <div className="mt-3 flex flex-row gap-4">
         <button
-          className="px-3 py-1 bg-red-600 text-white rounded"
+          className="px-3 py-1 bg-red-700 text-white rounded"
           onClick={handleBackspace}
         >
           Backspace
         </button>
 
         <button
-          className="px-4 py-2 bg-blue-600 text-white rounded"
+          className="px-4 py-2 hover:bg-[#8F2CC9] bg-[#b933ff] text-white rounded"
           onClick={() => onComplete(email)}
         >
           Confirm Email
