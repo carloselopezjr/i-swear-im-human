@@ -172,8 +172,7 @@ async function handleSubmit(e: FormEvent) {
           </div>
 
           {/* Login Card */}
-          <div className="border border-white/20 shadow-xl backdrop-blur-md 
-                          p-10 rounded-xl w-[350px] text-white hover:border-purple-400 transitional-all duration-300">
+          <div className="border border-white/20 shadow-xl backdrop-blur-md p-10 rounded-xl w-[350px] text-white hover:border-purple-400 transitional-all duration-300">
             <h2 className="text-center text-2xl font-bold mb-6">Sign Up</h2>
 
             {/* Email */}
