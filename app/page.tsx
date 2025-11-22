@@ -3,8 +3,8 @@
 import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import EmailCatchGame from '@/components/EmailCatchGame';
+import PasswordAimGame from '@/components/PasswordAimGame';
 import Fnaf from '@/components/jumpscare/fnaf';
-
 
 export default function Home() {
   
@@ -13,40 +13,41 @@ export default function Home() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  // Game toggles
   const [showEmailGame, setShowEmailGame] = useState(false);
+  const [showPasswordGame, setShowPasswordGame] = useState(false);
 
   // Jumpscare state
   const [showJumpscare, setShowJumpscare] = useState(false);
   const [jumpscareActive, setJumpscareActive] = useState(false);
 
   useEffect(() => {
-  if (!jumpscareActive) return;
+    if (!jumpscareActive) return;
 
-  let showTimeout: ReturnType<typeof setTimeout>;
-  let hideTimeout: ReturnType<typeof setTimeout>;
+    let showTimeout: ReturnType<typeof setTimeout>;
+    let hideTimeout: ReturnType<typeof setTimeout>;
 
-  function scheduleNextJumpscare() {
-    // random delay between 1-2 seconds
-    const delay = (Math.random() * 5 + 5) * 1000;
+    function scheduleNextJumpscare() {
+      const delay = (Math.random() * 5 + 5) * 1000;
 
-    showTimeout = setTimeout(() => {
-      setShowJumpscare(true);
+      showTimeout = setTimeout(() => {
+        setShowJumpscare(true);
 
-      // hide after 1.5 sec
-      hideTimeout = setTimeout(() => {
-        setShowJumpscare(false);
-        scheduleNextJumpscare();
-      }, 1500);
-    }, delay);
-  }
+        hideTimeout = setTimeout(() => {
+          setShowJumpscare(false);
+          scheduleNextJumpscare();
+        }, 1500);
+      }, delay);
+    }
 
-  scheduleNextJumpscare();
+    scheduleNextJumpscare();
 
-  return () => {
-    clearTimeout(showTimeout);
-    clearTimeout(hideTimeout);
-  };
-}, [jumpscareActive]);
+    return () => {
+      clearTimeout(showTimeout);
+      clearTimeout(hideTimeout);
+    };
+  }, [jumpscareActive]);
 
 
   const router = useRouter();
@@ -79,8 +80,9 @@ export default function Home() {
       style={{ backgroundImage: "url('/bg.jpg')" }}
       onClick={() => setJumpscareActive(true)}
     >
-      {/* If the game is active, hide the form */}
-      {showEmailGame ? (
+
+      {/* EMAIL GAME SCREEN */}
+      {showEmailGame && (
         <div className="flex flex-col items-center">
           <EmailCatchGame
             onComplete={(value) => {
@@ -95,7 +97,29 @@ export default function Home() {
             Cancel
           </button>
         </div>
-      ) : (
+      )}
+
+      {/* PASSWORD GAME SCREEN */}
+      {showPasswordGame && (
+        <div className="flex flex-col items-center">
+          <PasswordAimGame
+            onComplete={(value) => {
+              setPassword(value);
+              setShowPasswordGame(false);
+            }}
+            onCancel={() => setShowPasswordGame(false)}
+          />
+          <button
+            className="mt-4 px-4 py-2 bg-gray-600 text-white rounded"
+            onClick={() => setShowPasswordGame(false)}
+          >
+            Cancel
+          </button>
+        </div>
+      )}
+
+      {/* ONLY SHOW FORM IF NO GAME IS ACTIVE */}
+      {!showEmailGame && !showPasswordGame && (
         <form
           onSubmit={handleSubmit}
           className="flex flex-col justify-center items-center"
@@ -107,8 +131,8 @@ export default function Home() {
           </div>
 
           {/* Login Card */}
-          <div className=" border border-white/20 shadow-xl backdrop-blur-md 
-                  p-10 rounded-xl w-[350px] text-white">
+          <div className="border border-white/20 shadow-xl backdrop-blur-md 
+                          p-10 rounded-xl w-[350px] text-white">
             <h2 className="text-center text-2xl font-bold mb-6">Sign Up</h2>
 
             {/* Email */}
@@ -125,16 +149,16 @@ export default function Home() {
             {/* Password */}
             <label className="block mb-2 font-semibold">Password</label>
             <input
-              type="password"
-              placeholder="Enter your password"
+              type="text"
+              placeholder="Click to generate password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full px-4 py-2 mb-8 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none"
+              readOnly
+              onClick={() => setShowPasswordGame(true)}
+              className="w-full px-4 py-2 mb-8 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none cursor-pointer"
             />
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
 
-            {/* Button */}
             <button
               type="submit"
               disabled={loading}
@@ -145,6 +169,7 @@ export default function Home() {
           </div>
         </form>
       )}
+
       <Fnaf play={showJumpscare} />
     </main>
   );
