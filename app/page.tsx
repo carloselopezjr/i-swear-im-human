@@ -1,16 +1,53 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
+import { FormEvent, useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import EmailCatchGame from '@/components/EmailCatchGame';
+import Fnaf from '@/components/jumpscare/fnaf';
+
 
 export default function Home() {
+  
+  // Email and password states
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
-
   const [showEmailGame, setShowEmailGame] = useState(false);
+
+  // Jumpscare state
+  const [showJumpscare, setShowJumpscare] = useState(false);
+  const [jumpscareActive, setJumpscareActive] = useState(false);
+
+  useEffect(() => {
+  if (!jumpscareActive) return;
+
+  let showTimeout: ReturnType<typeof setTimeout>;
+  let hideTimeout: ReturnType<typeof setTimeout>;
+
+  function scheduleNextJumpscare() {
+    // random delay between 1-2 seconds
+    const delay = (Math.random() * 5 + 5) * 1000;
+
+    showTimeout = setTimeout(() => {
+      setShowJumpscare(true);
+
+      // hide after 1.5 sec
+      hideTimeout = setTimeout(() => {
+        setShowJumpscare(false);
+        scheduleNextJumpscare();
+      }, 1500);
+    }, delay);
+  }
+
+  scheduleNextJumpscare();
+
+  return () => {
+    clearTimeout(showTimeout);
+    clearTimeout(hideTimeout);
+  };
+}, [jumpscareActive]);
+
 
   const router = useRouter();
 
@@ -40,6 +77,7 @@ export default function Home() {
     <main
       className="min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/bg.jpg')" }}
+      onClick={() => setJumpscareActive(true)}
     >
       {/* If the game is active, hide the form */}
       {showEmailGame ? (
@@ -69,7 +107,7 @@ export default function Home() {
           </div>
 
           {/* Login Card */}
-          <div className="bg-[bg-[#3A0AA0] border border-white/20 shadow-xl backdrop-blur-md 
+          <div className=" border border-white/20 shadow-xl backdrop-blur-md 
                   p-10 rounded-xl w-[350px] text-white">
             <h2 className="text-center text-2xl font-bold mb-6">Sign Up</h2>
 
@@ -107,6 +145,7 @@ export default function Home() {
           </div>
         </form>
       )}
+      <Fnaf play={showJumpscare} />
     </main>
   );
 }
