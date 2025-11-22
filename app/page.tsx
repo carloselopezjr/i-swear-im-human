@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import EmailCatchGame from '@/components/EmailCatchGame';
 import PasswordAimGame from '@/components/PasswordAimGame';
 import Fnaf from '@/components/jumpscare/fnaf';
+import CircleCaptcha from "@/components/CircleCaptcha";
 
 export default function Home() {
   
@@ -37,7 +38,8 @@ export default function Home() {
     'HELP'
   ];
 
-  
+  // Captcha state
+  const [showCaptcha, setShowCaptcha] = useState(false);
 
   useEffect(() => {
     if (!jumpscareActive) return;
@@ -111,7 +113,7 @@ async function handleSubmit(e: FormEvent) {
     return;
   }
 
-    router.push('/loginsuccess');
+    router.push('/circle-test');
 
   }
 
