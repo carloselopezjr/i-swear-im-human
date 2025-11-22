@@ -1,9 +1,46 @@
+'use client';
+  
+import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
 export default function Home() {
+  
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  
+  async function handleSubmit(e: FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setLoading(true);
+  
+      const res = await fetch('/api/signup', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password }),
+      });
+  
+    const data = await res.json();
+    setLoading(false);
+  
+    if (!res.ok) {
+      setError(data.error || 'Signup failed');
+      return;
+    }
+  // After creating the account send to a win page or smth
+  // router.push('/win');
+  }
+
   return (
     <main
       className="min-h-screen w-full flex flex-col items-center justify-center bg-cover bg-center bg-no-repeat"
       style={{ backgroundImage: "url('/bg.jpg')" }}
     >
+      <form
+        onSubmit={handleSubmit}
+      >
       {/* Title */}
       <div className="text-center text-white mb-8 drop-shadow-xl">
         <h2 className="text-3xl font-bold mb-2">Welcome to...</h2>
@@ -20,6 +57,8 @@ export default function Home() {
         <input
           type="email"
           placeholder="Enter your email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
           className="w-full px-4 py-2 mb-6 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none"
         />
 
@@ -28,16 +67,23 @@ export default function Home() {
         <input
           type="password"
           placeholder="Enter your password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
           className="w-full px-4 py-2 mb-8 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none"
         />
 
+        {error && <p className="text-red-400 text-sm">{error}</p>}
+
         {/* Button */}
         <button
+          type="submit"
+          disabled={loading}
           className="w-full py-2 rounded-md bg-[#8F2CC9] hover:bg-[#b933ff] text-white font-semibold transition"
         >
           Sign in
         </button>
       </div>
+      </form>
     </main>
   );
 }
