@@ -14,7 +14,7 @@ interface ConfettiPiece {
 
 const COLORS = ["#ff6b6b", "#ffd93d", "#6bcBff", "#b933ff", "#8FFF8F"];
 
-export default function WinPage() {
+export default function Winpage() {
   const [confetti, setConfetti] = useState<ConfettiPiece[]>([]);
   const [waves, setWaves] = useState(0);
 
