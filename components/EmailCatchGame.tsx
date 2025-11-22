@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 
 // EMAIL-SAFE CHARACTERS (lowercase only)
-const EMAIL_CHARS = "abcdefghijklmnopqrstuvwxyz0123456789._-@";
+const EMAIL_CHARS = "abccdefghijklmmnoopqrstuvwxyz0123456789.._-@@";
 
 function getRandomChar() {
   return EMAIL_CHARS[Math.floor(Math.random() * EMAIL_CHARS.length)];
