@@ -43,8 +43,8 @@ export default function Home() {
       >
       {/* Title */}
       <div className="text-center text-white mb-8 drop-shadow-xl">
-        <h2 className="text-3xl font-bold mb-2">Welcome to...</h2>
-        <h1 className="text-4xl font-bold">i swear im human :&gt;</h1>
+        <h2 className="text-4xl font-bold mb-3">Welcome to...</h2>
+        <h1 className="text-5xl font-bold">i swear im human :&gt;</h1>
       </div>
 
       {/* Login Card */}
