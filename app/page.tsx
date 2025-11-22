@@ -71,7 +71,8 @@ export default function Home() {
       return;
     }
 
-    // router.push('/win');
+    router.push('/loginsuccess');
+
   }
 
   return (
@@ -85,7 +86,7 @@ export default function Home() {
       {showEmailGame && (
         <div className="flex flex-col items-center">
           <EmailCatchGame
-            onComplete={(value) => {
+            onComplete={(value: string) => {
               setEmail(value);
               setShowEmailGame(false);
             }}
@@ -103,7 +104,7 @@ export default function Home() {
       {showPasswordGame && (
         <div className="flex flex-col items-center">
           <PasswordAimGame
-            onComplete={(value) => {
+            onComplete={(value: string) => {
               setPassword(value);
               setShowPasswordGame(false);
             }}
