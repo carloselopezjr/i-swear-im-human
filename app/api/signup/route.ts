@@ -13,6 +13,13 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    if (!email.includes('@')) {
+      return NextResponse.json(
+        { error: 'Email must contain an @' },
+        { status: 400 }
+      );
+    }
+
     // Check if user already exists
     const existing = await prisma.user.findUnique({
       where: { email },
