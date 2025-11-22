@@ -40,6 +40,7 @@ export default function Home() {
     >
       <form
         onSubmit={handleSubmit}
+        className="flex flex-col justify-center items-center"
       >
       {/* Title */}
       <div className="text-center text-white mb-8 drop-shadow-xl">
