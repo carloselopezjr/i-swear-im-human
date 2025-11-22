@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import CircleCaptcha from "../../components/CircleCaptcha";
 
 export default function CircleTestPage() {
   const [showCaptcha, setShowCaptcha] = useState(false);
+  const router = useRouter();
 
   return (
     <div className="flex flex-col items-center justify-center h-screen bg-black text-white gap-6">
@@ -20,11 +22,13 @@ export default function CircleTestPage() {
       {showCaptcha && (
         <CircleCaptcha
           onSuccess={() => {
-            alert("passed!");
             setShowCaptcha(false);
+
+            // ⭐ Redirect to success page
+            router.push("/loginsuccess");
           }}
           onClose={() => {
-            alert("closed");
+            // If you want, you can return to login here
             setShowCaptcha(false);
           }}
         />
