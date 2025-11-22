@@ -1,6 +1,6 @@
 'use client';
 
-import { FormEvent, useState, useEffect } from 'react';
+import { FormEvent, useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import EmailCatchGame from '@/components/EmailCatchGame';
 import PasswordAimGame from '@/components/PasswordAimGame';
@@ -22,14 +22,32 @@ export default function Home() {
   const [showJumpscare, setShowJumpscare] = useState(false);
   const [jumpscareActive, setJumpscareActive] = useState(false);
 
+  // Annoying button 
+  const [buttonPos, setButtonPos] = useState({ top: 50, left: 50 }); // default to center of container
+  const MAX_MOVES = 8;
+  const moveCountRef = useRef(0);
+  const [moveCount, setMoveCount] = useState(0);
+  const [buttonText, setButtonText] = useState('Sign in');
+  const BULLY = [ 
+    'Ew... no',
+    'STOP!!!!',
+    'Im tired of you',
+    'Im trying to sleep',
+    'Please go away',
+    'HELP'
+  ];
+
+  
+
   useEffect(() => {
     if (!jumpscareActive) return;
 
     let showTimeout: ReturnType<typeof setTimeout>;
     let hideTimeout: ReturnType<typeof setTimeout>;
 
-    function scheduleNextJumpscare() {
-      const delay = (Math.random() * 5 + 5) * 1000;
+  function scheduleNextJumpscare() {
+    // random delay between 5-10 seconds
+    const delay = (Math.random() * 5 + 5) * 1000;
 
       showTimeout = setTimeout(() => {
         setShowJumpscare(true);
@@ -43,33 +61,55 @@ export default function Home() {
 
     scheduleNextJumpscare();
 
-    return () => {
-      clearTimeout(showTimeout);
-      clearTimeout(hideTimeout);
-    };
-  }, [jumpscareActive]);
+  return () => {
+    clearTimeout(showTimeout);
+    clearTimeout(hideTimeout);
+  };
+}, [jumpscareActive]);
+
+// This button annoying aslllll
+function moveButton() {
+  // stop moving after MAX_MOVES
+  if (moveCountRef.current >= MAX_MOVES) return;
+
+  // random % allowing movement outside the container bounds
+  const top = Math.random() * 250 - 20;
+  const left = Math.random() * 250 - 20;
+
+  // Determine bully text and at the end give up
+  const nextCount = moveCountRef.current + 1;
+  const nextText = nextCount >= MAX_MOVES ? 'ok fineee Sign in' : BULLY[Math.floor(Math.random() * BULLY.length)];
+
+  setButtonPos({ top, left });
+
+  // update counters (ref for sync, state for UI)
+  moveCountRef.current = nextCount;
+  setMoveCount(nextCount);
+  setButtonText(nextText);
+}
 
 
-  const router = useRouter();
 
-  async function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    setError(null);
-    setLoading(true);
+const router = useRouter();
 
-    const res = await fetch('/api/signup', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, password }),
-    });
+async function handleSubmit(e: FormEvent) {
+  e.preventDefault();
+  setError(null);
+  setLoading(true);
 
-    const data = await res.json();
-    setLoading(false);
+  const res = await fetch('/api/signup', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ email, password }),
+  });
 
-    if (!res.ok) {
-      setError(data.error || 'Signup failed');
-      return;
-    }
+  const data = await res.json();
+  setLoading(false);
+
+  if (!res.ok) {
+    setError(data.error || 'Signup failed');
+    return;
+  }
 
     router.push('/loginsuccess');
 
@@ -160,13 +200,20 @@ export default function Home() {
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
 
+            {/* Button */}
+            <div className="relative h-16 w-full overflow-visible">
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-2 rounded-md bg-[#8F2CC9] hover:bg-[#b933ff] text-white font-semibold transition"
+              onMouseEnter={moveButton}
+              className="absolute py-2 px-4 rounded-md bg-[#8F2CC9] hover:bg-[#b933ff] text-white font-semibold transition"
+              style={{ top: `${buttonPos.top}%`,
+                      left: `${buttonPos.left}%`,
+                      transform: "translate(-50%, -50%)",}}
             >
-              Sign in
+              {buttonText}
             </button>
+            </div>
           </div>
         </form>
       )}
