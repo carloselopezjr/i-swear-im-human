@@ -46,8 +46,8 @@ export default function Home() {
     let hideTimeout: ReturnType<typeof setTimeout>;
 
   function scheduleNextJumpscare() {
-    // random delay between 5-10 seconds
-    const delay = (Math.random() * 5 + 5) * 1000;
+    // random delay between 15-20 seconds
+    const delay = (Math.random() * 5 + 15) * 1000;
 
       showTimeout = setTimeout(() => {
         setShowJumpscare(true);
@@ -78,7 +78,7 @@ function moveButton() {
 
   // Determine bully text and at the end give up
   const nextCount = moveCountRef.current + 1;
-  const nextText = nextCount >= MAX_MOVES ? 'ok fineee Sign in' : BULLY[Math.floor(Math.random() * BULLY.length)];
+  const nextText = nextCount >= MAX_MOVES ? 'I give up, sign in' : BULLY[Math.floor(Math.random() * BULLY.length)];
 
   setButtonPos({ top, left });
 
@@ -167,30 +167,29 @@ async function handleSubmit(e: FormEvent) {
           </div>
 
           {/* Login Card */}
-          <div className="border border-white/20 shadow-xl backdrop-blur-md 
-                          p-10 rounded-xl w-[350px] text-white">
+          <div className="border border-white/20 shadow-xl backdrop-blur-md p-10 rounded-xl w-[350px] text-white hover:border-purple-400 transitional-all duration-300">
             <h2 className="text-center text-2xl font-bold mb-6">Sign Up</h2>
 
             {/* Email */}
             <label className="block mb-2 font-semibold">Email</label>
             <input
               type="text"
-              placeholder="Click to enter email"
+              placeholder="Please enter your email"
               value={email}
               readOnly
               onClick={() => setShowEmailGame(true)}
-              className="w-full px-4 py-2 mb-6 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none cursor-pointer"
+              className="w-full px-4 py-2 mb-6 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none cursor-pointer hover:scale-105 transition-all duration-300"
             />
 
             {/* Password */}
             <label className="block mb-2 font-semibold">Password</label>
             <input
               type="text"
-              placeholder="Click to generate password"
+              placeholder="Please enter your password"
               value={password}
               readOnly
               onClick={() => setShowPasswordGame(true)}
-              className="w-full px-4 py-2 mb-8 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none cursor-pointer"
+              className="w-full px-4 py-2 mb-8 rounded-md bg-[#a322f2] text-white placeholder-white/80 outline-none cursor-pointer hover:scale-105 transition-all duration-300"
             />
 
             {error && <p className="text-red-400 text-sm">{error}</p>}
