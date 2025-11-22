@@ -19,7 +19,10 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
   const timers = useRef<NodeJS.Timeout[]>([]);
   const intervals = useRef<NodeJS.Timeout[]>([]);
 
-  const [result, setResult] = useState<null | { score: number; pass: boolean; reason?: string }>(null);
+  const [result, setResult] = useState<
+    null | { score: number; pass: boolean; reason?: string }
+  >(null);
+
   const [showRetry, setShowRetry] = useState(false);
 
   const [isShaking, setIsShaking] = useState(false);
@@ -33,7 +36,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     return () => cleanupAll();
   }, []);
 
-  // timer helpers
+  // basic timer helper
 
   function setTimer(cb: () => void, delay: number) {
     const t = setTimeout(cb, delay);
@@ -41,11 +44,15 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     return t;
   }
 
-  function setIntervalTracked(cb: () => void, delay: number) {
-    const i = setInterval(cb, delay);
-    intervals.current.push(i);
-    return i;
+  // interval helper
+
+  function setTrackedInterval(cb: () => void, delay: number) {
+    const id = setInterval(cb, delay);
+    intervals.current.push(id);
+    return id;
   }
+
+  // stop all sounds and timers
 
   function cleanupAll() {
     timers.current.forEach(clearTimeout);
@@ -62,7 +69,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     setDriftOffset({ x: 0, y: 0 });
   }
 
-  // captcha start
+  // start new captcha attempt
 
   function startFresh() {
     cleanupAll();
@@ -80,15 +87,15 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     ctx.clearRect(0, 0, 400, 400);
     ctx.lineWidth = 4;
     ctx.lineCap = "round";
-    ctx.strokeStyle = "#A322F2";
+    ctx.strokeStyle = "#a322f2";
 
     drawCenterDot(ctx);
 
-    scheduleChaosEvents();
-    startAutoStopTimer();
+    scheduleChaos();
+    startTimeout();
   }
 
-  // center dot
+  // dot in center
 
   function drawCenterDot(ctx: CanvasRenderingContext2D) {
     ctx.fillStyle = "white";
@@ -97,18 +104,18 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     ctx.fill();
   }
 
-  // chaos timing
+  // chaos events
 
-  function scheduleChaosEvents() {
+  function scheduleChaos() {
     setTimer(() => {
       triggerShake(500);
-      applyRandomDrift(500);
-      playSingleBeep();
+      applyDrift(500);
+      playOneBeep();
     }, 3000);
 
     setTimer(() => {
       triggerShake(1200);
-      applyRandomDrift(1200);
+      applyDrift(1200);
       playRapidBeeps(1200);
     }, 5000);
   }
@@ -118,8 +125,8 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     setTimer(() => setIsShaking(false), duration);
   }
 
-  function applyRandomDrift(duration: number) {
-    const interval = setIntervalTracked(() => {
+  function applyDrift(duration: number) {
+    const interval = setTrackedInterval(() => {
       const x =
         (Math.random() > 0.5 ? 1 : -1) *
         (Math.random() * (DRIFT_MAX - DRIFT_MIN) + DRIFT_MIN);
@@ -137,7 +144,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     }, duration);
   }
 
-  function playSingleBeep() {
+  function playOneBeep() {
     if (!beep.current) return;
     beep.current.currentTime = 0;
     beep.current.play();
@@ -146,7 +153,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
   function playRapidBeeps(duration: number) {
     if (!beep.current) return;
 
-    const interval = setIntervalTracked(() => {
+    const interval = setTrackedInterval(() => {
       beep.current!.currentTime = 0;
       beep.current!.play();
     }, 90);
@@ -154,8 +161,10 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     setTimer(() => clearInterval(interval), duration);
   }
 
-  function startAutoStopTimer() {
-    setTimer(() => finishDrawing(true), 9000); // 9 seconds timeout
+  // auto stop after time limit
+
+  function startTimeout() {
+    setTimer(() => finishDrawing(true), 9000);
   }
 
   // drawing events
@@ -189,8 +198,6 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     ctx.stroke();
 
     points.current.push({ x, y });
-
-    checkForCircleCompletion(x, y);
   }
 
   function handleMouseUp() {
@@ -198,72 +205,11 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
       failedFromLift.current = true;
       finishDrawing(false);
     }
+
     isDrawing.current = false;
   }
 
-  // strict circle completion logic
-
-  function checkForCircleCompletion(x: number, y: number) {
-    const pts = points.current;
-    if (pts.length < 150) return;
-
-    const start = pts[0];
-    const dx = x - start.x;
-    const dy = y - start.y;
-    const distToStart = Math.sqrt(dx * dx + dy * dy);
-
-    if (distToStart > 15) return;
-
-    const cx = 200;
-    const cy = 200;
-
-    let angles = pts.map(p => Math.atan2(p.y - cy, p.x - cx));
-    angles = angles.map(a => (a < 0 ? a + Math.PI * 2 : a)).sort((a, b) => a - b);
-
-    let maxGap = 0;
-    for (let i = 0; i < angles.length - 1; i++) {
-      const gap = angles[i + 1] - angles[i];
-      if (gap > maxGap) maxGap = gap;
-    }
-
-    const endGap = (Math.PI * 2) - angles[angles.length - 1] + angles[0];
-    if (endGap > maxGap) maxGap = endGap;
-
-    const coverage = (Math.PI * 2) - maxGap;
-
-    if (coverage > 4.2) finishDrawing(false);
-  }
-
-  // finish and scoring
-
-  function finishDrawing(fromTimeout: boolean) {
-    cleanupAll();
-
-    if (failedFromLift.current) {
-      setResult({ score: 0, pass: false, reason: "please draw a complete circle ✗" });
-      setShowRetry(true);
-      return;
-    }
-
-    if (fromTimeout && !isCircleClosed(points.current)) {
-      setResult({ score: 0, pass: false, reason: "please draw a complete circle ✗" });
-      setShowRetry(true);
-      return;
-    }
-
-    const score = calculateCircleAccuracy(points.current);
-    const pass = score >= 78;
-
-    if (!isCircleClosed(points.current)) {
-      setResult({ score, pass: false, reason: "please draw a complete circle ✗" });
-      setShowRetry(true);
-      return;
-    }
-
-    setResult({ score, pass });
-
-    if (!pass) setShowRetry(true);
-  }
+  // angle coverage check only
 
   function isCircleClosed(path: { x: number; y: number }[]) {
     if (path.length < 150) return false;
@@ -271,21 +217,30 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     const cx = 200;
     const cy = 200;
 
-    let angles = path.map(p => Math.atan2(p.y - cy, p.x - cx));
-    angles = angles.map(a => (a < 0 ? a + Math.PI * 2 : a)).sort((a, b) => a - b);
+    let angles = path.map((p) => Math.atan2(p.y - cy, p.x - cx));
+
+    angles = angles.map((a) => (a < 0 ? a + Math.PI * 2 : a)).sort(
+      (a, b) => a - b
+    );
 
     let maxGap = 0;
+
     for (let i = 0; i < angles.length - 1; i++) {
       const gap = angles[i + 1] - angles[i];
       if (gap > maxGap) maxGap = gap;
     }
 
-    const endGap = (Math.PI * 2) - angles[angles.length - 1] + angles[0];
-    if (endGap > maxGap) maxGap = endGap;
+    const wrapGap =
+      Math.PI * 2 - angles[angles.length - 1] + angles[0];
 
-    const coverage = (Math.PI * 2) - maxGap;
-    return coverage > 4.2;
+    if (wrapGap > maxGap) maxGap = wrapGap;
+
+    const coverage = Math.PI * 2 - maxGap;
+
+    return coverage > 4.2; // about 240 degrees
   }
+
+  // scoring
 
   function calculateCircleAccuracy(path: { x: number; y: number }[]) {
     if (path.length < 10) return 0;
@@ -293,13 +248,16 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     const cx = 200;
     const cy = 200;
 
-    const distances = path.map(p =>
+    const distances = path.map((p) =>
       Math.sqrt((p.x - cx) ** 2 + (p.y - cy) ** 2)
     );
 
     const avg = distances.reduce((a, b) => a + b, 0) / distances.length;
+
     const variance =
-      distances.reduce((a, r) => a + (r - avg) ** 2, 0) / distances.length;
+      distances.reduce((a, r) => a + (r - avg) ** 2, 0) /
+      distances.length;
+
     const deviation = Math.sqrt(variance);
 
     if (avg < 60) return 0;
@@ -307,18 +265,66 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     return Math.round(Math.max(0, 100 - deviation * 4));
   }
 
-  // reset
+  // final evaluation
+
+  function finishDrawing(fromTimeout: boolean) {
+    cleanupAll();
+
+    const closed = isCircleClosed(points.current);
+
+    if (failedFromLift.current && !closed) {
+      setResult({
+        score: 0,
+        pass: false,
+        reason: "please draw a complete circle ✗",
+      });
+      setShowRetry(true);
+      return;
+    }
+
+    if (fromTimeout && !closed) {
+      setResult({
+        score: 0,
+        pass: false,
+        reason: "please draw a complete circle ✗",
+      });
+      setShowRetry(true);
+      return;
+    }
+
+    if (!closed) {
+      setResult({
+        score: 0,
+        pass: false,
+        reason: "please draw a complete circle ✗",
+      });
+      setShowRetry(true);
+      return;
+    }
+
+    const score = calculateCircleAccuracy(points.current);
+    const pass = score >= 78;
+
+    setResult({ score, pass });
+
+    if (!pass) setShowRetry(true);
+  }
+
+  // reset everything
 
   function resetCaptcha() {
     cleanupAll();
+
     points.current = [];
     failedFromLift.current = false;
+
     setResult(null);
     setShowRetry(false);
+
     startFresh();
   }
 
-  // ui
+  // user interface
 
   return (
     <div
@@ -327,7 +333,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
       }`}
       style={{
         zIndex: 9999,
-        transform: `translate(${driftOffset.x}px, ${driftOffset.y}px)`
+        transform: `translate(${driftOffset.x}px, ${driftOffset.y}px)`,
       }}
     >
       <div className="absolute top-6 text-white text-xl font-semibold">
@@ -346,7 +352,9 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
 
       {result && (
         <div className="absolute top-20 text-center text-white text-xl">
-          {result.reason ? result.reason : `accuracy: ${result.score}% ${result.pass ? "✓" : "✗"}`}
+          {result.reason
+            ? result.reason
+            : `accuracy: ${result.score}% ${result.pass ? "✓" : "✗"}`}
         </div>
       )}
 
