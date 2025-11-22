@@ -303,7 +303,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
     }
 
     const score = calculateCircleAccuracy(points.current);
-    const pass = score >= 78;
+    const pass = score >= 60;
 
     setResult({ score, pass });
 
@@ -337,7 +337,7 @@ export default function CircleCaptcha({ onSuccess, onClose }: CircleCaptchaProps
       }}
     >
       <div className="absolute top-6 text-white text-xl font-semibold">
-        draw a perfect circle in one continuous stroke
+        Draw a perfect circle in one continuous stroke with 60% accuracy or higher!
       </div>
 
       <canvas
