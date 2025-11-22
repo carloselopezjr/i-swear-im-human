@@ -111,7 +111,8 @@ async function handleSubmit(e: FormEvent) {
     return;
   }
 
-    // router.push('/win');
+    router.push('/loginsuccess');
+
   }
 
   return (
@@ -125,7 +126,7 @@ async function handleSubmit(e: FormEvent) {
       {showEmailGame && (
         <div className="flex flex-col items-center">
           <EmailCatchGame
-            onComplete={(value) => {
+            onComplete={(value: string) => {
               setEmail(value);
               setShowEmailGame(false);
             }}
@@ -143,7 +144,7 @@ async function handleSubmit(e: FormEvent) {
       {showPasswordGame && (
         <div className="flex flex-col items-center">
           <PasswordAimGame
-            onComplete={(value) => {
+            onComplete={(value: string) => {
               setPassword(value);
               setShowPasswordGame(false);
             }}
