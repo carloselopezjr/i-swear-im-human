@@ -6,6 +6,7 @@ import EmailCatchGame from '@/components/EmailCatchGame';
 import PasswordAimGame from '@/components/PasswordAimGame';
 import Fnaf from '@/components/jumpscare/fnaf';
 import CircleCaptcha from "@/components/CircleCaptcha";
+import { Typewriter } from "react-simple-typewriter";
 
 export default function Home() {
   
@@ -163,13 +164,18 @@ async function handleSubmit(e: FormEvent) {
           className="flex flex-col justify-center items-center"
         >
           {/* Title */}
-          <div className="text-center text-white mb-8 drop-shadow-xl">
-            <h2 className="text-4xl font-bold mb-3">Welcome to...</h2>
-            <h1 className="text-5xl font-bold">i swear im human :&gt;</h1>
-          </div>
+          <h1 className="text-5xl font-bold mb-12 hover:scale-105 h-[3.5rem] transition-all duration-300">
+            <Typewriter
+            words={["I swear I'm human...", "Good luck!"]}
+            loop={1}
+            typeSpeed={80}
+            deleteSpeed={50}
+            delaySpeed={1500}
+            />
+          </h1>
 
           {/* Login Card */}
-          <div className="border border-white/20 shadow-xl backdrop-blur-md p-10 rounded-xl w-[350px] text-white hover:border-purple-400 transitional-all duration-300">
+          <div className="border border-white/20 shadow-xl backdrop-blur-md p-10 rounded-xl w-[350px] text-white hover:border-purple-400 transition-all duration-300">
             <h2 className="text-center text-2xl font-bold mb-6">Sign Up</h2>
 
             {/* Email */}
